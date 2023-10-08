@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  user-service:
+    build: .
+    environment:
+      - PORT=3001
+      - DB_URI=mongodb://mongodb:27017/blog
+      - CRYPT_SALT=10
+      - JWT_KEY=j5723hfgs9
+      - JWT_EXPIRE=1d
+    networks:
+      - default
+      - nginx
+
+networks:
+  default:
+    external: true
+    name: database_docker-network
+  # nginx:
+  #   external: true
+  #   name: todo_nginx
+  nginx:
+    driver: bridge
