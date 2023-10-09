@@ -8,6 +8,8 @@ services:
       - CRYPT_SALT=10
       - JWT_KEY=j5723hfgs9
       - JWT_EXPIRE=1d
+      - REDIS_URI=redis://localhost:6379/
+      - REDIS_SECRET=yh93gjso64
     networks:
       - default
       - nginx
