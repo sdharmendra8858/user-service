@@ -43,6 +43,12 @@ const registerUser = async (req, res) => {
             tokens: [{token}]
         });
 
+        // setting the user id in the session for the user
+        req.session.userId = userId;
+
+        // saving the token in the redis
+        await redisClient.SADD(`user:token:${userId}`, token);
+
         const data = {
             ...response,
             "token": token
@@ -107,6 +113,9 @@ const loginUser = async (req, res) => {
         user.tokens.push({token});
 
         await UsersModel.update({userId: user.userId}, {"$set": {tokens: user.tokens}});
+        
+        //setting the token in the redis
+        await redisClient.SADD(`user:token:${user.userId}`, token);
 
         // deleting the sensitive information
         delete user.tokens;
@@ -138,6 +147,9 @@ const logout = async (req, res) => {
 
         await UsersModel.update({ userId: user.userId }, {$set: {tokens: newTokens}});
 
+        // remove the token from the redis
+        await redisClient.SREM(`user:token:${user.userId}`, providedToken);
+
         return res.send({
             status: "Success",
             data: "Logged out"
@@ -157,6 +169,8 @@ const logoutAll = async (req, res) => {
         const { user } = req;
 
         await UsersModel.update({ userId: user.userId }, {$set: {tokens: []}});
+
+        await redisClient.DEL(`user:token:${user.userId}`);
 
         return res.send({
             status: "Success",
