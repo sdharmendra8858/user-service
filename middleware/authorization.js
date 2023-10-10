@@ -24,9 +24,19 @@ const verifyToken = async (req, res, next) => {
         }
         const decode = await jwt.verify(req.headers.token, process.env.JWT_KEY);
 
-        req.token = req.headers.token;
+        const token = req.headers.token;
+        const userId = decode.userId;
 
-        const user = await UsersModel.findOne({ userId: decode.userId, tokens: { $elemMatch: {token: req.token} } });
+        req.token = token;
+        req.session.userId = userId;
+
+        const userSession = await redisClient.SISMEMBER(`user:token:${userId}`, token);
+
+        if(!userSession){
+            throw new Error("Session expired, please log in.");
+        }
+
+        const user = await UsersModel.findOne({ userId, tokens: { $elemMatch: {token} } });
 
         if(_.isEmpty(user)){
             throw new Error("Session expired, please log in.")
