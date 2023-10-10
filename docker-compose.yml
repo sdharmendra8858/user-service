@@ -8,19 +8,16 @@ services:
       - CRYPT_SALT=10
       - JWT_KEY=j5723hfgs9
       - JWT_EXPIRE=1d
-      - REDIS_URI=redis://localhost:6379/
+      - REDIS_URI=redis://redis:6379/
       - REDIS_PORT=6379
       - REDIS_SECRET=yh93gjso64
     networks:
-      - default
+      - docker-network
       - nginx
 
 networks:
-  default:
+  docker-network:
     external: true
     name: database_docker-network
-  # nginx:
-  #   external: true
-  #   name: todo_nginx
   nginx:
     driver: bridge
